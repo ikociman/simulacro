@@ -162,8 +162,12 @@ hayObstruccion tramo espOcupado auto =
 desgastePorObstruccion :: Tramo -> Float -> Auto -> Auto
 desgastePorObstruccion tramo espOcupado auto  = 
     auto {
-        desgaste = (desgasteRuedas auto - (2 * espOcupado + (fst.desgaste.tramo)auto), desgasteChasis auto)
+        desgaste = (desgasteRuedas auto - desgasteObstruccionTramo tramo espOcupado auto, desgasteChasis auto)
     }
+
+desgasteObstruccionTramo :: Tramo -> Float -> Auto -> Float
+desgasteObstruccionTramo tramo espOcupado auto = 
+    desgasteRuedas auto - (2 * espOcupado + (fst.desgaste.tramo)auto)
 
 
 
