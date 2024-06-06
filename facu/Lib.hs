@@ -128,8 +128,8 @@ penalizacion tiempo auto =
     }
 
 
-limpiezaOlluvia :: Tramo -> Auto -> Auto
-limpiezaOlluvia tramo auto = 
+hayLimpiezaOlluvia :: Tramo -> Auto -> Auto
+hayLimpiezaOlluvia tramo auto = 
     auto {
         tiempoCarrera = tiempoCarrera auto + (diferenciaTiempos auto (tramo auto) / 2)
     }
@@ -138,8 +138,8 @@ diferenciaTiempos :: Auto -> Auto -> Float
 diferenciaTiempos autoInicial autoFinal = 
     tiempoCarrera autoFinal - tiempoCarrera autoInicial
 
-ripio :: Tramo -> Auto -> Auto
-ripio tramo auto = 
+hayRipio :: Tramo -> Auto -> Auto
+hayRipio tramo auto = 
     auto {
         desgaste = desgastePorRipio tramo auto,
         tiempoCarrera = tiempoCarrera auto + (diferenciaTiempos auto (tramo auto) * 2)
@@ -154,6 +154,17 @@ diferenciaDesgaste autoInicial autoFinal =
 desgastePorRipio :: Tramo -> Auto -> (Float, Float)
 desgastePorRipio tramo auto  = 
     (desgasteRuedas auto - desgasteRuedas (diferenciaDesgaste auto (tramo auto)) * 2, desgasteChasis auto - desgasteChasis (diferenciaDesgaste auto (tramo auto)) * 2)
+
+hayObstruccion :: Tramo -> Float -> Auto -> Auto
+hayObstruccion tramo espOcupado auto =
+    desgastePorObstruccion tramo espOcupado auto
+    
+desgastePorObstruccion :: Tramo -> Float -> Auto -> Auto
+desgastePorObstruccion tramo espOcupado auto  = 
+    auto {
+        desgaste = (desgasteRuedas auto - (2 * espOcupado + (fst.desgaste.tramo)auto), desgasteChasis auto)
+    }
+
 
 
 
