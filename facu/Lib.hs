@@ -5,9 +5,9 @@ data Auto = Auto {
     desgaste      :: (Float,Float),
     velMax        :: Float, 
     tiempoCarrera :: Float
-} deriving(Show, Eq);
+} deriving(Show, Eq)
 
-ferrari :: Auto;
+ferrari :: Auto
 ferrari = Auto {
     marca = "Ferrari",
     modelo = "F50",
@@ -16,7 +16,7 @@ ferrari = Auto {
     tiempoCarrera = 0
 }
 
-lamborguini :: Auto;
+lamborguini :: Auto
 lamborguini = Auto {
     marca = "Lamborguini",
     modelo = "Diablo",
@@ -25,7 +25,7 @@ lamborguini = Auto {
     tiempoCarrera = 0
 }
 
-fiat :: Auto;
+fiat :: Auto
 fiat = Auto {
     marca = "Fiat",
     modelo = "600",
@@ -34,88 +34,127 @@ fiat = Auto {
     tiempoCarrera = 0
 }
 
-type Tramo = Auto -> Auto;
+type Tramo = Auto -> Auto
 
 
 -- Punto 2
-enBuenEstado :: Auto -> Bool;
+enBuenEstado :: Auto -> Bool
 enBuenEstado (Auto _ _ desgaste _ _ ) = 
-    fst desgaste < 60 && snd desgaste < 40;
-;
+    fst desgaste < 60 && snd desgaste < 40
 
-noDaMas :: Auto -> Bool;
+
+noDaMas :: Auto -> Bool
 noDaMas (Auto _ _ desgaste _ _ ) = 
-    fst desgaste > 60 || snd desgaste > 40;
-;
+    fst desgaste > 60 || snd desgaste > 40
+
 
 
 -- Punto 3
-reparacionChasis :: Float -> Float;
-reparacionChasis desgasteChasis = 
-    desgasteChasis - desgasteChasis * 0.85;
-;
+desgasteRuedas :: Auto -> Float
+desgasteRuedas auto = 
+    fst (desgaste auto)
 
-reparacionRuedas :: (Float -> Float) -> Float -> Float;
-reparacionRuedas desgasteRuedas long ang =
-    desgasteRuedas - 3 * long / ang;
-;
+
+desgasteChasis :: Auto -> Float
+desgasteChasis auto = 
+    snd (desgaste auto)
+
+
+cambiarDesgasteChasis :: (Float -> Float) -> Auto -> Auto
+cambiarDesgasteChasis modificador auto = 
+    auto {
+        desgaste = (desgasteRuedas auto, (modificador)(desgasteChasis auto))
+    }
+
+
+cambiarDesgasteRuedas :: (Float -> Float) -> Auto -> Auto
+cambiarDesgasteRuedas modificador auto = 
+    auto {
+        desgaste = ((modificador) (desgasteRuedas auto), desgasteChasis auto)
+    }
+
+
+reparacion :: Auto -> Auto
+reparacion = cambiarDesgasteChasis (*0.15) . cambiarDesgasteRuedas (*0)
 
 -- Punto 4
-curva :: Float -> Float -> Auto -> Auto;
+incrementarTiempo :: Float -> Auto -> Auto
+incrementarTiempo incremento auto = 
+    auto {
+        tiempoCarrera = tiempoCarrera auto + incremento 
+    }
+
+
+curva :: Float -> Float -> Auto -> Auto
 curva angulo long auto =
-    auto {
-        desgaste = (fst (desgaste auto) - 3 * long / angulo , snd (desgaste auto)),
-        tiempoCarrera = tiempoCarrera auto +  long / (velMax auto / 2)
-    };
-;
+    incrementarTiempo (long / (velMax auto / 2)) . cambiarDesgasteRuedas ((-)(3 * long / angulo)) $ auto
 
-curvaPeligrosa :: Auto -> Auto;
-curvaPeligrosa auto = 
-    curva 60 300 $ auto;
-;
 
-curvaTranca :: Auto -> Auto;
-curvaTranca auto =
-    curva 110 550 $ auto;
-;
+curvaPeligrosa :: Auto -> Auto
+curvaPeligrosa  = 
+    curva 60 300  
 
-recto :: Float -> Auto -> Auto;
+
+curvaTranca :: Auto -> Auto
+curvaTranca  =
+    curva 110 550  
+
+
+recto :: Float -> Auto -> Auto
 recto long auto =
-    auto {
-        desgaste = (fst (desgaste auto), snd (desgaste auto) - long / 100),
-        tiempoCarrera = tiempoCarrera auto + long / velMax auto
-    };
-;
+    incrementarTiempo (long / velMax auto) . cambiarDesgasteChasis ((-)(long / 100)) $ auto
 
-tramoRectoClassic :: Auto -> Auto;
-tramoRectoClassic auto = 
-    recto 750 $ auto;
-;
 
-tramito :: Auto -> Auto;
-tramito auto =
-    recto 280 $ auto
-;
+tramoRectoClassic :: Auto -> Auto
+tramoRectoClassic  = 
+    recto 750 
 
-boxes :: Auto -> Auto;
+
+tramito :: Auto -> Auto
+tramito =
+    recto 280  
+
+
+boxes :: Auto -> Auto
 boxes auto 
     | enBuenEstado auto = auto
-    | otherwise = (penalizacion.reparacion) $ auto 
-;
+    | otherwise = (penalizacion 10 . reparacion) $ auto 
 
-penalizacion :: Auto -> Auto;
-penalizacion auto = 
+
+penalizacion :: Float -> Auto -> Auto
+penalizacion tiempo auto = 
     auto {
-        tiempoCarrera = tiempoCarrera auto + 10
-    };
-;
+        tiempoCarrera = tiempoCarrera auto + tiempo
+    }
 
-limpiezaOlluvia :: Tramo -> Auto -> Auto;
+
+limpiezaOlluvia :: Tramo -> Auto -> Auto
 limpiezaOlluvia tramo auto = 
     auto {
-        tiempoCarrera = (tramo auto - tiempoCarrera auto) / 2
-    };
-; 
+        tiempoCarrera = tiempoCarrera auto + (diferenciaTiempos auto (tramo auto) / 2)
+    }
+ 
+diferenciaTiempos :: Auto -> Auto -> Float
+diferenciaTiempos autoInicial autoFinal = 
+    tiempoCarrera autoFinal - tiempoCarrera autoInicial
+
+ripio :: Tramo -> Auto -> Auto
+ripio tramo auto = 
+    auto {
+        desgaste = (desgasteRuedas auto - desgasteRuedas (diferenciaDesgaste auto (tramo auto)) * 2, desgasteChasis auto - desgasteChasis (diferenciaDesgaste auto (tramo auto)) * 2),
+        tiempoCarrera = tiempoCarrera auto + (diferenciaTiempos auto (tramo auto) * 2)
+    }
+
+diferenciaDesgaste :: Auto -> Auto -> Auto
+diferenciaDesgaste autoInicial autoFinal = 
+    autoFinal {
+        desgaste = (desgasteRuedas autoFinal - desgasteRuedas autoInicial, desgasteChasis autoFinal - desgasteChasis autoInicial)
+    }
+
+
+
+
+
 
 
     

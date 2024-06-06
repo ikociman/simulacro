@@ -67,7 +67,7 @@ cambiarDesgasteChasis :: (Float -> Float) -> Auto -> Auto
 cambiarDesgasteChasis modificador unAuto = unAuto {desgaste = (desgasteRuedas unAuto, (modificador)(desgasteChasis unAuto))}
 
 cambiarDesgasteRuedas :: (Float -> Float) -> Auto -> Auto
-cambiarDesgasteRuedas modificador unAuto = unAuto {desgaste = ((modificador)(desgasteRuedas unAuto), desgasteChasis unAuto)}
+cambiarDesgasteRuedas modificador = unAuto {desgaste = ((modificador)(desgasteRuedas unAuto), desgasteChasis unAuto)}
 
 reparar :: Auto -> Auto
 reparar = cambiarDesgasteChasis (*0.15) . cambiarDesgasteRuedas (*0)
