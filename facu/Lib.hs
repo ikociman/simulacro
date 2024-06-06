@@ -141,7 +141,7 @@ diferenciaTiempos autoInicial autoFinal =
 ripio :: Tramo -> Auto -> Auto
 ripio tramo auto = 
     auto {
-        desgaste = (desgasteRuedas auto - desgasteRuedas (diferenciaDesgaste auto (tramo auto)) * 2, desgasteChasis auto - desgasteChasis (diferenciaDesgaste auto (tramo auto)) * 2),
+        desgaste = desgastePorRipio tramo auto,
         tiempoCarrera = tiempoCarrera auto + (diferenciaTiempos auto (tramo auto) * 2)
     }
 
@@ -151,6 +151,9 @@ diferenciaDesgaste autoInicial autoFinal =
         desgaste = (desgasteRuedas autoFinal - desgasteRuedas autoInicial, desgasteChasis autoFinal - desgasteChasis autoInicial)
     }
 
+desgastePorRipio :: Tramo -> Auto -> (Float, Float)
+desgastePorRipio tramo auto  = 
+    (desgasteRuedas auto - desgasteRuedas (diferenciaDesgaste auto (tramo auto)) * 2, desgasteChasis auto - desgasteChasis (diferenciaDesgaste auto (tramo auto)) * 2)
 
 
 
