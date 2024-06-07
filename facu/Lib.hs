@@ -36,8 +36,9 @@ fiat = Auto {
 
 type Tramo = Auto -> Auto
 
-
+----------
 -- Punto 2
+----------
 enBuenEstado :: Auto -> Bool
 enBuenEstado (Auto _ _ desgaste _ _ ) = 
     fst desgaste < 60 && snd desgaste < 40
@@ -48,8 +49,9 @@ noDaMas (Auto _ _ desgaste _ _ ) =
     fst desgaste > 60 || snd desgaste > 40
 
 
-
+----------
 -- Punto 3
+----------
 desgasteRuedas :: Auto -> Float
 desgasteRuedas auto = 
     fst (desgaste auto)
@@ -77,7 +79,9 @@ cambiarDesgasteRuedas modificador auto =
 reparacion :: Auto -> Auto
 reparacion = cambiarDesgasteChasis (*0.15) . cambiarDesgasteRuedas (*0)
 
+----------
 -- Punto 4
+----------
 incrementarTiempo :: Float -> Auto -> Auto
 incrementarTiempo incremento auto = 
     auto {
@@ -169,8 +173,30 @@ desgasteObstruccionTramo :: Tramo -> Float -> Auto -> Float
 desgasteObstruccionTramo tramo espOcupado auto = 
     desgasteRuedas auto - (2 * espOcupado + (fst.desgaste.tramo)auto)
 
+----------
+-- Punto 5
+----------
+pasarPorTramo :: Tramo -> Auto -> Auto
+pasarPorTramo tramo auto  
+    | noDaMas auto = auto
+    | otherwise = tramo auto
 
-
+----------
+-- Punto 6
+----------
+superPista :: [Auto -> Auto]
+superPista = [
+    tramoRectoClassic,
+    curvaTranca,
+    hayLimpiezaOlluvia tramito, -- First tramito is wet
+    tramito, -- Second tramito
+    hayObstruccion (curva 80 400) 2, -- Curva with obstruction
+    curva 115 650, -- Curva
+    recto 970, -- Tramo recto
+    curvaPeligrosa,
+    hayRipio tramito, -- Tramito with ripio
+    boxes (recto 800) -- Boxes with tramo recto
+]
 
 
 
